@@ -50,8 +50,36 @@ namespace Study_ToDoList.Domain
 
         }
 
-        public void 
+        public void Start()
+        {
+            Id = Guid.NewGuid();
+            Title = Title + " - " + Description;
+            Description = Description;
+            Priority = TaskPriority.Low;
+            Status = TaskStatus.Pending;
+            CreatedAt = DateTime.UtcNow;
 
+        }
 
+        public void Block(string? reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+               throw new ArgumentException(nameof(reason), "This field cannot be empty.");
+                
+            }
+                BlockedReason = reason;
+                Status = TaskStatus.Blocked;
+        }
+
+        public void Complete()
+        {
+            if (Status == TaskStatus.Blocked)
+            {
+                throw new InvalidOperationException("The status is blocked. Please unlock it and try to confirm again.");
+            }
+            Status = TaskStatus.Completed;
+            CompletedAt = DateTime.UtcNow;
+        }
     }
 }
