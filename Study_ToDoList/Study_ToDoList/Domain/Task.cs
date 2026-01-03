@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace Study_ToDoList.Domain
 {
@@ -47,18 +41,17 @@ namespace Study_ToDoList.Domain
             Priority = priority;
             Status = TaskStatus.Pending;
             CreatedAt = DateTime.UtcNow;
-
         }
 
         public void Start()
         {
-            Id = Guid.NewGuid();
-            Title = Title + " - " + Description;
-            Description = Description;
-            Priority = TaskPriority.Low;
-            Status = TaskStatus.Pending;
-            CreatedAt = DateTime.UtcNow;
+            if(Status != TaskStatus.Pending)
+            {
+                throw new InvalidOperationException("Invalid operation: The current status is not 'Pending'.");
+            }
 
+            Status = TaskStatus.InProgress;
+            StartedAt = DateTime.UtcNow;
         }
 
         public void Block(string? reason)
@@ -68,8 +61,9 @@ namespace Study_ToDoList.Domain
                throw new ArgumentException(nameof(reason), "This field cannot be empty.");
                 
             }
-                BlockedReason = reason;
-                Status = TaskStatus.Blocked;
+
+            BlockedReason = reason;
+            Status = TaskStatus.Blocked;
         }
 
         public void Complete()
