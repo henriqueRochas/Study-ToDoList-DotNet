@@ -9,16 +9,29 @@ namespace Study_ToDoList.Service
 
         public void CreateUsersTask()
         {
-            User user = new User();
-            DomainTask task = new DomainTask();
+            User user = new User
+            (
+               Guid.NewGuid(),
+               "Henrique",
+               "henrique@email.com.br",
+               3
+            );
+
+            DomainTask task = new DomainTask
+            (
+                Guid.NewGuid(),
+                "Minha tarefa",
+                "Descrição qualquer",
+                DomainTask.TaskPriority.Medium
+                
+            );
 
             int amount = 2;
-
-            user.Id = Guid.NewGuid();
-            user.Name = "Henrique";
-            user.Email = "henrique@email.com.br";
+            string reason = "test block";
             user.CheckMaxTasks(amount);
             task.Start();
+            task.Block(reason);
+            task.Complete();
         }
     }
 }
