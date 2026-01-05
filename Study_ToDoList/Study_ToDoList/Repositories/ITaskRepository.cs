@@ -10,7 +10,7 @@ namespace Study_ToDoList.Repositories
     {
 
         void CreateTask(Task task);
-       Task SearchTask(Guid id);
+        Task SearchTask(Guid id);
         List<Task> ListTask();
         void UpdateTask(Task task);
     }
