@@ -1,5 +1,4 @@
 ﻿using Study_ToDoList.Domain;
-using DomainTask = Study_ToDoList.Domain.Task;
 
 
 namespace Study_ToDoList.Service
@@ -9,6 +8,7 @@ namespace Study_ToDoList.Service
 
         public void CreateUsersTask()
         {
+
             User user = new User
             (
                Guid.NewGuid(),
@@ -17,21 +17,22 @@ namespace Study_ToDoList.Service
                3
             );
 
-            DomainTask task = new DomainTask
+
+            TaskManager taskManager = new TaskManager
             (
                 Guid.NewGuid(),
                 "Minha tarefa",
                 "Descrição qualquer",
-                DomainTask.TaskPriority.Medium
+                TaskManager.TaskPriority.Medium
                 
             );
 
             int amount = 2;
             string reason = "test block";
             user.CheckMaxTasks(amount);
-            task.Start();
-            task.Block(reason);
-            task.Complete();
+            taskManager.Start();
+            taskManager.Block(reason);
+            taskManager.Complete();
         }
     }
 }

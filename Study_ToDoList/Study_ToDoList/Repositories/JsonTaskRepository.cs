@@ -1,22 +1,22 @@
-﻿using System;
+﻿using Study_ToDoList.Domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Study_ToDoList.Repositories
 {
     internal class JsonTaskRepository : ITaskRepository
     {
-        private List<Task> Tasks { get; set; }
+        private List<TaskManager> Tasks { get; set; }
 
-        private  string jsonPath = @"Study_ToDoList\Study_ToDoList\Data\";
+        private string jsonPath = @"Study_ToDoList\Study_ToDoList\Data\";
         private string jsonPathFile = @"task.json";
 
         public JsonTaskRepository()
         {
-            Tasks = new List<Task>();
+            Tasks = new List<TaskManager>();
 
             if (!Directory.Exists(jsonPath))
             {
@@ -24,37 +24,75 @@ namespace Study_ToDoList.Repositories
             }
         }
 
-        public void CreateTask(Task task)
+        public void CreateTask(TaskManager task)
         {
             Tasks.Add(task);
             string teste = JsonSerializer.Serialize(Tasks);
             File.WriteAllText(jsonPathFile, teste);
         }
 
-        public List<Task> ListTask()
+        public List<TaskManager> ListTask()
         {
             if (File.Exists(jsonPathFile))
-            { 
-                    string readContent = File.ReadAllText(jsonPathFile);
-                    var readList = JsonSerializer.Deserialize<List<Task>>(readContent);
-                    Tasks = readList;
+            {
+                string readContent = File.ReadAllText(jsonPathFile);
+                var readList = JsonSerializer.Deserialize<List<TaskManager>>(readContent);
+                Tasks = readList;
             }
             else
             {
                 throw new Exception("File doesn't exist");
             }
 
-                return Tasks;
+            return Tasks;
         }
 
-        public Task SearchTask(Guid id)
+        public TaskManager SearchTask(Guid id)
         {
-            throw new NotImplementedException();
+            var searchTasks = File.ReadAllText(jsonPathFile);
+            var readList = JsonSerializer.Deserialize<List<TaskManager>>(searchTasks);
+            Tasks = readList;
+
+            foreach (var item in Tasks)
+            {
+                if (item.Id == id)
+                {
+                    return item;
+                }
+            }
+
+            throw new InvalidOperationException("This id not found, try again");
         }
 
-        public void UpdateTask(Task task)
+        public void UpdateTask(TaskManager task)
         {
-            throw new NotImplementedException();
+            var readFile = File.ReadAllText(jsonPathFile);
+            var readUpdateFile = JsonSerializer.Deserialize<List<TaskManager>>(readFile);
+
+            Tasks = readUpdateFile;
+
+            bool teste = false;
+
+            foreach (var item in Tasks)
+            {
+                if (item.Id == task.Id)
+                {
+                    item.Status = TaskManager.TaskStatus.InProgress;
+                    teste = true;
+                }
+            }
+
+            if(teste == true)
+            {
+                string updateFile = JsonSerializer.Serialize(Tasks);
+                File.WriteAllText(jsonPathFile, updateFile);
+
+            }
+            else
+            {
+                throw new InvalidOperationException("This id not found, try again");
+            }
         }
     }
 }
+

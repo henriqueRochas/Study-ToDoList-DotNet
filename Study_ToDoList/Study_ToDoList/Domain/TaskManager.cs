@@ -2,7 +2,7 @@
 
 namespace Study_ToDoList.Domain
 {
-    internal class Task
+    internal class TaskManager
     {
 
         public Guid Id { get; set; }
@@ -31,9 +31,9 @@ namespace Study_ToDoList.Domain
             High
         }
 
-        public Task() { }
+        public TaskManager() { }
 
-        public Task(Guid id, string title, string description, TaskPriority priority)
+        public TaskManager(Guid id, string title, string description, TaskPriority priority)
         {
             Id = id;
             Title = title;
