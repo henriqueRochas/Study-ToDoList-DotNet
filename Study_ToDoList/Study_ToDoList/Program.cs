@@ -29,10 +29,46 @@ namespace Study_ToDoList
                 Progress,
                 Completed
             }
+        }
 
-            public TaskManager SearchTask(List<TaskManager> listTasks, int id)
+        public class TaskService
+        {
+            private List<TaskManager> ListTasks { get; set; }
+
+            public TaskService()
             {
-                var search = listTasks.FirstOrDefault(a => a.Id == id);
+                ListTasks = new List<TaskManager>();
+            }
+
+            public TaskService(List<TaskManager> listTasks)
+            {
+                ListTasks = listTasks;
+            }
+            public void CreatedTask()
+            {
+                ListTasks.AddRange(new List<TaskManager>
+                {
+                     new TaskManager() { Id = 1, Title = "Task 1", Status = StatusTask.Pending},
+                     new TaskManager() { Id = 2, Title = "Task 2", Status = StatusTask.Pending},
+                     new TaskManager() { Id = 3, Title = "Task 3", Status = StatusTask.Pending},
+                     new TaskManager() { Id = 4, Title = "Task 4", Status = StatusTask.Completed},
+                     new TaskManager() { Id = 5, Title = "Task 5", Status = StatusTask.Progress},
+                     new TaskManager() { Id = 6, Title = "Task 6", Status = StatusTask.Pending},
+                     new TaskManager() { Id = 7, Title = "Task 7", Status = StatusTask.Completed},
+                     new TaskManager() { Id = 8, Title = "Task 8", Status = StatusTask.Completed},
+                     new TaskManager() { Id = 9, Title = "Task 9", Status = StatusTask.Progress}
+                });
+            }
+            public List<TaskManager> ListTask()
+            {
+                return ListTasks;
+            }
+
+
+
+            public TaskManager SearchTask(int id)
+            {
+                var search = ListTasks.FirstOrDefault(a => a.Id == id);
 
                 if (search != null)
                 {
@@ -44,9 +80,9 @@ namespace Study_ToDoList
                 }
             }
 
-            public bool ChangeStatus(List<TaskManager> listTasks, int id)
+            public bool ChangeStatus(int id)
             {
-                var resultSearch = SearchTask(listTasks, id);
+                var resultSearch = SearchTask(id);
 
                 if (resultSearch == null)
                 {
@@ -57,11 +93,13 @@ namespace Study_ToDoList
                     if (resultSearch.Status == StatusTask.Pending)
                     {
                         resultSearch.Status = StatusTask.Progress;
+                        resultSearch.HistoryTask.Add("Task Progress");
                         return true;
                     }
                     else if (resultSearch.Status == StatusTask.Progress)
                     {
                         resultSearch.Status = StatusTask.Completed;
+                        resultSearch.HistoryTask.Add("Task Completed");
                         return true;
                     }
                     else
@@ -70,14 +108,61 @@ namespace Study_ToDoList
                     }
                 }
             }
+
+            public bool RemoveTasks(int id)
+            {
+                var resultSearch = SearchTask(id);
+
+                if (resultSearch == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (resultSearch.Status == StatusTask.Completed)
+                    {
+                        resultSearch.HistoryTask.Add("Task Progress");
+                        ListTasks.Remove(resultSearch);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            public List<string> HistoryTask(int id)
+            {
+                var resultSearch = SearchTask(id);
+                if (resultSearch != null)
+                {
+                    return resultSearch.HistoryTask;
+                }
+                else
+                {
+                    return new List<string>();
+                }
+
+            }
+
+            public IEnumerable<TaskManager> FilterTask()
+            {
+                var filterStatusTask1 = ListTasks
+                .Where(i => i.Status == StatusTask.Pending || i.Status == StatusTask.Completed || i.Status == StatusTask.Progress);
+
+                return filterStatusTask1;
+
+            }
         }
+
         static void Main(string[] args)
         {
-            List<TaskManager> listTasks = new List<TaskManager>();
             int _option;
+            TaskService taskService = new TaskService();
 
             do
             {
+
                 Console.WriteLine("Menu");
                 Console.WriteLine();
 
@@ -100,27 +185,18 @@ namespace Study_ToDoList
                         Console.WriteLine("Create Tasl");
                         Console.WriteLine();
 
-                        listTasks.AddRange(new List<TaskManager>
-                        {
-                            new TaskManager() { Id = 1, Title = "Task 1", Status = StatusTask.Pending},
-                            new TaskManager() { Id = 2, Title = "Task 2", Status = StatusTask.Pending},
-                            new TaskManager() { Id = 3, Title = "Task 3", Status = StatusTask.Pending},
-                            new TaskManager() { Id = 4, Title = "Task 4", Status = StatusTask.Completed},
-                            new TaskManager() { Id = 5, Title = "Task 5", Status = StatusTask.Progress},
-                            new TaskManager() { Id = 6, Title = "Task 6", Status = StatusTask.Pending},
-                            new TaskManager() { Id = 7, Title = "Task 7", Status = StatusTask.Completed},
-                            new TaskManager() { Id = 8, Title = "Task 8", Status = StatusTask.Completed},
-                            new TaskManager() { Id = 9, Title = "Task 9", Status = StatusTask.Progress}
-                        });
+                        taskService.CreatedTask();
 
                         break;
                     case 2:
                         Console.WriteLine("List Task");
                         Console.WriteLine();
 
-                        foreach (var item in listTasks)
+                        var list = taskService.ListTask();
+
+                        foreach (var item in list)
                         {
-                            Console.WriteLine($"Id: {item.Id} Title: {item.Title} Status: {item.Status}");
+                            Console.WriteLine($" Id{item.Id} Title {item.Title} Status {item.Status}");
                         }
 
                         break;
@@ -128,24 +204,11 @@ namespace Study_ToDoList
                         Console.WriteLine("Start Task");
                         Console.WriteLine();
 
-                        bool checkId = false;
                         int id = int.Parse(Console.ReadLine());
 
-                        foreach (var item in listTasks)
-                        {
-                            if (item.Id == id)
-                            {
-                                if (item.Status == StatusTask.Pending)
-                                {
-                                    item.Status = StatusTask.Progress;
-                                    checkId = true;
-                                    item.HistoryTask.Add("Task progress");
-                                    break;
-                                }
-                            }
-                        }
+                        var checkTask = taskService.ChangeStatus(id);
 
-                        if (checkId != true)
+                        if (checkTask != true)
                         {
                             Console.WriteLine("Id not found and status not compatible");
                         }
@@ -155,24 +218,11 @@ namespace Study_ToDoList
                         Console.WriteLine("Completed Task");
                         Console.WriteLine();
 
-                        bool checkId2 = false;
                         int ids = int.Parse(Console.ReadLine());
 
-                        foreach (var item in listTasks)
-                        {
-                            if (item.Id == ids)
-                            {
-                                if (item.Status == StatusTask.Progress)
-                                {
-                                    item.Status = StatusTask.Completed;
-                                    checkId2 = true;
-                                    item.HistoryTask.Add("Task completed");
-                                    break;
-                                }
-                            }
-                        }
+                        var checkTask2 = taskService.ChangeStatus(ids);
 
-                        if (checkId2 != true)
+                        if (checkTask2 != true)
                         {
                             Console.WriteLine("Id not found and status not compatible");
                         }
@@ -182,79 +232,37 @@ namespace Study_ToDoList
                         Console.WriteLine("Remove Task");
                         Console.WriteLine();
 
-                        bool checkId3 = false;
+
                         int id3 = int.Parse(Console.ReadLine());
 
-                        for (int i = 0; i < listTasks.Count; i++)
-                        {
-                            var item = listTasks[i];
-                            if (item.Id == id3)
-                            {
-                                if (item.Status == StatusTask.Completed)
-                                {
-                                    item.HistoryTask.Add("Task remove");
-                                    listTasks.RemoveAt(i);
-                                    checkId3 = true;
-                                    break;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("The task exists, but it is incomplete and can't be removed");
-                                }
-                            }
-                        }
-                        if (!checkId3)
-                        {
-                            Console.WriteLine("Id not found and status not compatible");
-                        }
-
+                        taskService.RemoveTasks(id3);
                         break;
                     case 6:
+                        Console.WriteLine("History Task");
+                        Console.WriteLine();
+
                         int id4 = int.Parse(Console.ReadLine());
 
-                        foreach (var item in listTasks)
+                        var history = taskService.HistoryTask(id4);
+
+                        foreach (var item in history)
                         {
-                            if (item.Id == id4)
-                            {
-                                foreach (var item1 in item.HistoryTask)
-                                {
-                                    Console.WriteLine(item1);
-                                }
-                            }
+                            Console.WriteLine(item);
                         }
+
                         break;
-
                     case 7:
-                        var filterStatusTask1 = listTasks.Where(i => i.Status == StatusTask.Pending);
+                        Console.WriteLine("Filter Task");
+                        Console.WriteLine();
+                        var listFilter = taskService.FilterTask();
 
-                        foreach (var item in filterStatusTask1)
+
+                        foreach (var item in listFilter)
                         {
                             Console.WriteLine($"Status: {item.Status}");
                         }
-
-                        Console.WriteLine();
-                        var filterStatusTask2 = listTasks
-                            .Where(r => r.Status == StatusTask.Completed);
-
-                        foreach (var item1 in filterStatusTask2)
-                        {
-                            Console.WriteLine($"Status: {item1.Status}");
-                        }
-
-                        Console.WriteLine();
-
-                        var count = listTasks.GroupBy(a => a.Status);
-
-                        foreach (var item in count)
-                        {
-                            Console.WriteLine($"Status: {item.Key} Amount: {item.Count()}");
-                        }
-
-                        Console.WriteLine();
-
-                        var check = listTasks.FirstOrDefault(p => p.Status == StatusTask.Progress);
-                        Console.WriteLine($"Status: {check.Status}");
                         break;
+
                 }
             }
             while (_option != 0);
